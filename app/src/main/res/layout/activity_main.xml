@@ -5,11 +5,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ImageView
+        android:id="@+id/cam"
+        app:layout_constraintTop_toTopOf="@id/main_image"
+        app:layout_constraintBottom_toBottomOf="@id/main_image"
+        app:layout_constraintLeft_toLeftOf="@id/main_image"
+        app:layout_constraintRight_toRightOf="@id/main_image"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:clickable="true"
+        android:elevation="5dp"/>
+
+    <ImageView
         android:id="@+id/main_image"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
+        android:background="@drawable/custom_border"
         android:layout_margin="16dp"
+        android:padding="8dp"
         android:layout_width="match_parent"
         android:layout_height="500dp"/>
 
@@ -18,9 +31,9 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:id="@+id/btn_take_photo"
+        android:id="@+id/btn_send_absen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/take_photo"/>
+        android:text="@string/submit"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

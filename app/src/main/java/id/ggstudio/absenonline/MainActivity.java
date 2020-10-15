@@ -4,15 +4,27 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import id.ggstudio.absenonline.databinding.ActivityMainBinding;
+import id.ggstudio.absenonline.model.Absen;
+import id.ggstudio.absenonline.service.AbsenService;
+import id.ggstudio.absenonline.util.ApiClient;
+import id.ggstudio.absenonline.util.GeoLocation;
+import id.ggstudio.absenonline.util.ImageCompression;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 import android.Manifest;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.view.View;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.karumi.dexter.Dexter;
@@ -22,10 +34,15 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements PermissionListener, View.OnClickListener {
 
@@ -34,6 +51,13 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
 
     private String mCurrentPhotoPath;
 
+    private Retrofit retrofit;
+    private AbsenService absenService;
+    private String encodedImage;
+
+    private String latitude;
+    private String longitude;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,13 +65,50 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
         View view = binding.getRoot();
         setContentView(view);
 
-        binding.btnTakePhoto.setOnClickListener(this);
+        Dexter.withContext(this)
+                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                .withListener(this)
+                .check();
+
+        retrofit = ApiClient.getInstance();
+        absenService = retrofit.create(AbsenService.class);
+
+        binding.btnSendAbsen.setOnClickListener(this);
+        binding.cam.setOnClickListener(this);
+
+        Glide.with(this)
+                .load(R.drawable.cam)
+                .into(binding.cam);
+
+
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btn_take_photo:
+            case R.id.btn_send_absen:
+
+                Absen absen = new Absen();
+                absen.setId(UUID.randomUUID().toString());
+                absen.setImage(encodedImage);
+                absen.setLatitude(latitude);
+                absen.setLongitude(longitude);
+
+                absenService.postAbsen(absen).enqueue(new Callback<Absen>() {
+                    @Override
+                    public void onResponse(Call<Absen> call, Response<Absen> response) {
+                        Toast.makeText(MainActivity.this, "Berhasil", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Call<Absen> call, Throwable t) {
+                        Toast.makeText(MainActivity.this, "Gagal", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+
+                break;
+            case R.id.cam:
                 Dexter.withContext(this)
                         .withPermission(Manifest.permission.CAMERA)
                         .withListener(this)
@@ -84,11 +145,24 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
 //            Bitmap data1 = (Bitmap) extras.get("data");
 
             File file = new File(mCurrentPhotoPath);
-            Uri contentURI = Uri.fromFile(file);
 
+            ImageCompression compression = new ImageCompression(this);
+            String compressedPath = compression.compressImage(mCurrentPhotoPath);
+
+            Bitmap bm = BitmapFactory.decodeFile(compressedPath);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] b = baos.toByteArray();
+
+            encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
+
+            Uri contentURI = Uri.fromFile(file);
             Glide.with(this)
                     .load(contentURI)
                     .into(binding.mainImage);
+
+            binding.cam.setVisibility(View.GONE);
+
         }
     }
 
@@ -97,6 +171,11 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
         switch (permissionGrantedResponse.getPermissionName()) {
             case Manifest.permission.CAMERA:
                 dispatchTakePictureIntent();
+                break;
+            case Manifest.permission.ACCESS_FINE_LOCATION:
+                GeoLocation geoLocation = new GeoLocation(this);
+                longitude = String.valueOf(geoLocation.getLongitude());
+                latitude = String.valueOf(geoLocation.getLatitude());
                 break;
             default:
                 break;
@@ -113,6 +192,29 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
 
     }
 
+    private String encodeImageToBase64(String fileName) throws FileNotFoundException {
+        InputStream inputStream = new FileInputStream(fileName); // You can get an inputStream using any I/O API
+        byte[] bytes;
+        byte[] buffer = new byte[8192];
+        int bytesRead;
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        try {
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                output.write(buffer, 0, bytesRead);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        bytes = output.toByteArray();
+        return Base64.encodeToString(bytes, Base64.DEFAULT);
+    }
+
+    private void sendAbsen() {
+
+    }
+
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -125,5 +227,13 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
 
+        Dexter.withContext(this)
+                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                .withListener(this)
+                .check();
+    }
 }
