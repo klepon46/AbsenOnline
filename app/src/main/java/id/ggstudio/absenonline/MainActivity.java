@@ -3,6 +3,7 @@ package id.ggstudio.absenonline;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import id.ggstudio.absenonline.activities.ProgressActivity;
 import id.ggstudio.absenonline.databinding.ActivityMainBinding;
 import id.ggstudio.absenonline.model.Absen;
 import id.ggstudio.absenonline.service.AbsenService;
@@ -22,6 +23,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Toast;
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
     private String mCurrentPhotoPath;
+    private String mCompressedPath;
 
     private Retrofit retrofit;
     private AbsenService absenService;
@@ -79,8 +82,6 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
         Glide.with(this)
                 .load(R.drawable.cam)
                 .into(binding.cam);
-
-
     }
 
     @Override
@@ -88,24 +89,24 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
         switch (v.getId()) {
             case R.id.btn_send_absen:
 
+                if (TextUtils.isEmpty(mCurrentPhotoPath)) {
+                    Toast.makeText(this, "Image Not Detected", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 Absen absen = new Absen();
                 absen.setId(UUID.randomUUID().toString());
                 absen.setImage(encodedImage);
                 absen.setLatitude(latitude);
                 absen.setLongitude(longitude);
 
-                absenService.postAbsen(absen).enqueue(new Callback<Absen>() {
-                    @Override
-                    public void onResponse(Call<Absen> call, Response<Absen> response) {
-                        Toast.makeText(MainActivity.this, "Berhasil", Toast.LENGTH_SHORT).show();
-                    }
+                Intent intent = new Intent(this, ProgressActivity.class);
+                intent.putExtra("photoPath", mCompressedPath);
+                intent.putExtra("latitude", latitude);
+                intent.putExtra("longitude", longitude);
 
-                    @Override
-                    public void onFailure(Call<Absen> call, Throwable t) {
-                        Toast.makeText(MainActivity.this, "Gagal", Toast.LENGTH_SHORT).show();
-                    }
-                });
-
+                startActivity(intent);
+                finish();
 
                 break;
             case R.id.cam:
@@ -147,14 +148,8 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
             File file = new File(mCurrentPhotoPath);
 
             ImageCompression compression = new ImageCompression(this);
-            String compressedPath = compression.compressImage(mCurrentPhotoPath);
+            mCompressedPath = compression.compressImage(mCurrentPhotoPath);
 
-            Bitmap bm = BitmapFactory.decodeFile(compressedPath);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bm.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] b = baos.toByteArray();
-
-            encodedImage = Base64.encodeToString(b, Base64.DEFAULT);
 
             Uri contentURI = Uri.fromFile(file);
             Glide.with(this)
@@ -162,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
                     .into(binding.mainImage);
 
             binding.cam.setVisibility(View.GONE);
+            binding.txtTap.setVisibility(View.GONE);
 
         }
     }

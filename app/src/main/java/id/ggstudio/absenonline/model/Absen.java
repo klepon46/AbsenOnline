@@ -1,13 +1,17 @@
 package id.ggstudio.absenonline.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Absen {
+public class Absen implements Serializable {
     private String id;
     private Date createdDate;
     private String image;
     private String latitude;
     private String longitude;
+
+    public Absen() {
+    }
 
     public String getId() {
         return id;
