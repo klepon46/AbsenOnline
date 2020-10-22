@@ -37,6 +37,9 @@ import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -74,6 +77,9 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
         View view = binding.getRoot();
         setContentView(view);
 
+        setSupportActionBar(binding.mainToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         sp = getSharedPreferences(MYPREF, Context.MODE_PRIVATE);
 
         Dexter.withContext(this)
@@ -96,6 +102,22 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
         Glide.with(this)
                 .load(R.drawable.cam)
                 .into(binding.cam);
+
+        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withIdentifier(1).withName("Home");
+        SecondaryDrawerItem item2 = new SecondaryDrawerItem().withIdentifier(2).withName("Settings");
+
+
+        new DrawerBuilder()
+                .withActivity(this)
+                .withToolbar(binding.mainToolbar)
+                .withActionBarDrawerToggleAnimated(true)
+                .withActionBarDrawerToggle(true)
+                .addDrawerItems(
+                        item1,
+                        item2
+                        //pass your items here
+                )
+                .build();
     }
 
     @Override
