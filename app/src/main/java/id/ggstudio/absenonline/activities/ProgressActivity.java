@@ -14,6 +14,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -22,8 +24,11 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
 
 import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 public class ProgressActivity extends AppCompatActivity {
@@ -34,12 +39,19 @@ public class ProgressActivity extends AppCompatActivity {
     private AbsenService absenService;
     private Absen absen;
 
+    private SharedPreferences sp;
+    private static final String MYPREF = "absensi";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityProgressBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
+
+        sp = getSharedPreferences(MYPREF, Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sp.edit();
 
         String photoPath = getIntent().getStringExtra("photoPath");
         String latitude = getIntent().getStringExtra("latitude");
@@ -56,16 +68,15 @@ public class ProgressActivity extends AppCompatActivity {
         retrofit = ApiClient.getInstance();
         absenService = retrofit.create(AbsenService.class);
 
-//        CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(this);
-//        circularProgressDrawable.setStrokeWidth(5f);
-//        circularProgressDrawable.setCenterRadius(30f);
-//        circularProgressDrawable.start();
+        DrawableCrossFadeFactory factory =
+                new DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build();
 
         Absen absen = new Absen();
         absen.setId(UUID.randomUUID().toString());
         absen.setImage(encodedImage);
         absen.setLongitude(longitude);
         absen.setLatitude(latitude);
+
 
 
         absenService.postAbsen(absen).enqueue(new Callback<Absen>() {
@@ -78,6 +89,13 @@ public class ProgressActivity extends AppCompatActivity {
                 Glide.with(ProgressActivity.this)
                         .load(R.drawable.success)
                         .into(binding.imgProgress);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy HH:mm");
+                String date = sdf.format(new Date());
+
+
+                editor.putString("last_attend", date);
+                editor.apply();
 
                 binding.txtStatus.setText("Succesfully Sending Data");
             }

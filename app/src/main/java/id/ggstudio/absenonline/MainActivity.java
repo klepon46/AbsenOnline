@@ -16,7 +16,9 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -61,12 +63,18 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
     private String latitude;
     private String longitude;
 
+    private SharedPreferences sp;
+
+    private static final String MYPREF = "absensi";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
+
+        sp = getSharedPreferences(MYPREF, Context.MODE_PRIVATE);
 
         Dexter.withContext(this)
                 .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -78,6 +86,12 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
 
         binding.btnSendAbsen.setOnClickListener(this);
         binding.cam.setOnClickListener(this);
+
+        String username = sp.getString("username","-");
+        String lastAttend = sp.getString("last_attend","-");
+
+        binding.txtUsername.setText(username);
+        binding.txtLastAttend.setText(lastAttend);
 
         Glide.with(this)
                 .load(R.drawable.cam)

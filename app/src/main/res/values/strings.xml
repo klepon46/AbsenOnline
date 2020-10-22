@@ -1,5 +1,10 @@
 <resources>
-    <string name="app_name">Absensi Online</string>
+    <string name="app_name">Online Attendance</string>
     <string name="take_photo">Take Photo</string>
-    <string name="submit">Submit Absen</string>
+    <string name="submit">Submit Attendance</string>
+
+    <string-array name="company">
+        <item>PT. Adaro Indonesia</item>
+        <item>PT. Mitra Integrasi Informatika</item>
+    </string-array>
 </resources>
