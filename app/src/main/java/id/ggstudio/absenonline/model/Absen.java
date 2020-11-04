@@ -9,6 +9,8 @@ public class Absen implements Serializable {
     private String image;
     private String latitude;
     private String longitude;
+    private String nik;
+    private String company;
 
     public Absen() {
     }
@@ -51,6 +53,22 @@ public class Absen implements Serializable {
 
     public void setLongitude(String longitude) {
         this.longitude = longitude;
+    }
+
+    public String getNik() {
+        return nik;
+    }
+
+    public void setNik(String nik) {
+        this.nik = nik;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
     }
 
     @Override

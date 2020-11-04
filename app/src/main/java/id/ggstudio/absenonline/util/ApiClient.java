@@ -12,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
     public static Retrofit retrofit;
-    public static final String BASE_URL = "https://absen-adro.azurewebsites.net/";
+    public static final String BASE_URL = "http://sysdev-mandiri.southeastasia.cloudapp.azure.com:8080/";
 
     public static Retrofit getInstance() {
 

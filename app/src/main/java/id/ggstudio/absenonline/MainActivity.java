@@ -135,6 +135,8 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
                 absen.setImage(encodedImage);
                 absen.setLatitude(latitude);
                 absen.setLongitude(longitude);
+                absen.setNik(sp.getString("username",""));
+                absen.setCompany(sp.getString("abbrCompany",""));
 
                 Intent intent = new Intent(this, ProgressActivity.class);
                 intent.putExtra("photoPath", mCompressedPath);

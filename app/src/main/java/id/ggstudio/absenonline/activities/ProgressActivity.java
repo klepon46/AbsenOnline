@@ -76,8 +76,8 @@ public class ProgressActivity extends AppCompatActivity {
         absen.setImage(encodedImage);
         absen.setLongitude(longitude);
         absen.setLatitude(latitude);
-
-
+        absen.setNik(sp.getString("username","-"));
+        absen.setCompany(sp.getString("company","-"));
 
         absenService.postAbsen(absen).enqueue(new Callback<Absen>() {
             @Override

@@ -80,12 +80,12 @@
 <!--        </com.google.android.material.textfield.TextInputLayout>-->
 
         <Spinner
-
+            android:id="@+id/spinner_company"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="24dp"
-            android:entries="@array/company"/>
+            />
 
         <Button
             android:background="@drawable/custom_button_login"
