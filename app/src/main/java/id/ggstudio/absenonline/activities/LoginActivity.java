@@ -82,6 +82,7 @@ public class LoginActivity extends AppCompatActivity {
                 editor.putString("username", binding.inputUsername.getText().toString());
                 editor.putString("company", String.valueOf(company.getNameCompany()));
                 editor.putString("abbrCompany", String.valueOf(company.getAbbrCompany()));
+                editor.putInt("idCompany", company.getIdCompany());
                 editor.apply();
 
                 Intent intent = new Intent(v.getContext(), MainActivity.class);

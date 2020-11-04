@@ -130,14 +130,6 @@ public class MainActivity extends AppCompatActivity implements PermissionListene
                     return;
                 }
 
-                Absen absen = new Absen();
-                absen.setId(UUID.randomUUID().toString());
-                absen.setImage(encodedImage);
-                absen.setLatitude(latitude);
-                absen.setLongitude(longitude);
-                absen.setNik(sp.getString("username",""));
-                absen.setCompany(sp.getString("abbrCompany",""));
-
                 Intent intent = new Intent(this, ProgressActivity.class);
                 intent.putExtra("photoPath", mCompressedPath);
                 intent.putExtra("latitude", latitude);

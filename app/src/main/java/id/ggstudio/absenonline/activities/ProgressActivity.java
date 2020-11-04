@@ -71,13 +71,15 @@ public class ProgressActivity extends AppCompatActivity {
         DrawableCrossFadeFactory factory =
                 new DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build();
 
+        int idCompany = sp.getInt("idCompany",9999);
+
         Absen absen = new Absen();
         absen.setId(UUID.randomUUID().toString());
         absen.setImage(encodedImage);
         absen.setLongitude(longitude);
         absen.setLatitude(latitude);
         absen.setNik(sp.getString("username","-"));
-        absen.setCompany(sp.getString("company","-"));
+        absen.setCompany(String.valueOf(idCompany));
 
         absenService.postAbsen(absen).enqueue(new Callback<Absen>() {
             @Override
